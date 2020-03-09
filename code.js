@@ -121,8 +121,12 @@ bot.on('message', async message => {
 
 
 
+  // work on code below
 
-  
+
+
+
+
 
   if (message.content.toLowerCase().startsWith(`${config.prefix}${config.xpName}`)){
     if (!message.member.roles.exists("name", `${config.officerRoleE}`)){
