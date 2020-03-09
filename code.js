@@ -41,6 +41,37 @@ bot.on('message', async message => {
   if (message.author.bot) return;
   if (message.channel.type === "dm") return;
 
+
+
+  if (message.content.toLowerCase().startsWith(`${config.prefix}commands`)){
+    var first = new Discord.RichEmbed()
+      .setColor(0x1279ff)
+      .setTitle(`__Member Commands__`)
+      .setDescription(`The following commands can be ran by: *everyone*.`)
+      .addField(`**\`${config.prefix}prefix\`**`, `Returns the current prefix set for the guild.`)
+      .addField(`**\`${config.prefix}commands\`**`, `Displays this menu`)
+      .addField(`**\`${config.prefix}verify\`**`, `Associates a user's ROBLOX account with their Discord 
+        account through verification procedures.`)
+      .addField(`**\`${config.prefix}view username\`**`, `Views ${config.xpName} information about the 
+        given username (\`username\`).`)
+    await message.author.send(first);
+    var second = new Discord.RichEmbed()
+      .setColor(0xff6b4a)
+      .setTitle(`__Officer Commands__`)
+      .setDescription(`The following commands can be ran by: *officers*.`)
+      .addField(`**\`${config.prefix}${config.xpName} add 1 username1, username2, username3, 
+        etc\`**`, `Adds 1 ${config.xpName} to the usernames provided (\`username1, username2, username3, etc\`).`)
+      .addField(`**\`${config.prefix}${config.xpName} remove 1 username1, username2, username3, etc\`**`, `Removes
+       1 ${config.xpName} to the usernames provided (\`username1, username2, username3, etc\`).`)
+    await message.author.send(second);
+    var third = new Discord.RichEmbed()
+      .setColor(0xffffff)
+      .setTitle(`__Owner Commands__`)
+      .setDescription(`The following commands can be ran by: *owner*.`)
+      .addField(`**\`${config.prefix}setup\`**`, `Sets up the guild with all of the information found in the config.json file (./settings/config.json).`)
+    return await message.author.send(third);
+  }
+
   if (message.content.toLowerCase().startsWith(`${config.prefix}verify`)){
     if (!message.guild.members.get(bot.user.id).hasPermission("MANAGE_NICKNAMES")){
       return message.channel.send(`Sorry ${message.author}, but I don't have permissions to manage 
@@ -118,9 +149,6 @@ bot.on('message', async message => {
       }
     }
   }
-
-
-
   // work on code below
 
 
@@ -571,34 +599,6 @@ bot.on('message', async message => {
       return message.reply(response).then(message => message.delete(30000))
     }
 
-  }
-
-
-
-  if (message.content.toLowerCase().startsWith(`${config.prefix}commands`)){
-    var first = new Discord.RichEmbed()
-      .setColor(0x1279ff)
-      .setTitle(`__Member Commands__`)
-      .setDescription(`The following commands can be ran by: *everyone*.`)
-      .addField(`**\`${config.prefix}verify\`**`, `Associates a user's ROBLOX account with their Discord account through verification procedures.`)
-      .addField(`**\`${config.prefix}view username1\`**`, `Views ${config.xpName} information about the given username (\`username1\`).`)
-      .addField(`**\`${config.prefix}prefix\`**`, `Returns the current prefix set for the guild.`)
-      .addField(`**\`${config.prefix}commands\`**`, `Displays this menu`)
-    await message.author.send(first)
-    var second = new Discord.RichEmbed()
-      .setColor(0xff6b4a)
-      .setTitle(`__Officer Commands__`)
-      .setDescription(`The following commands can be ran by: *officers*.`)
-      .addField(`**\`${config.prefix}${config.xpName} add 1 username1, username2, username3, etc\`**`, `Adds 1 ${config.xpName} to the usernames provided (\`username1, username2, username3, etc\`).`)
-      .addField(`**\`${config.prefix}${config.xpName} remove 1 username1, username2, username3, etc\`**`, `Removes 1 ${config.xpName} to the usernames provided (\`username1, username2, username3, etc\`).`)
-    await message.author.send(second)
-    var third = new Discord.RichEmbed()
-      .setColor(0xffffff)
-      .setTitle(`__Owner Commands__`)
-      .setDescription(`The following commands can be ran by: *owner*.`)
-      .addField(`**\`${config.prefix}setup\`**`, `Sets up the guild with all of the information found in the config.json file (./settings/config.json).`)
-    await message.author.send(third)
-    return undefined;
   }
 
   if (message.content.toLowerCase().startsWith(`${config.prefix}code`) || message.content.toLowerCase().startsWith(`${config.prefix}link`) || message.content.toLowerCase().startsWith(`${config.prefix}tutorial`)){
