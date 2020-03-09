@@ -172,6 +172,115 @@ bot.on('message', async message => {
     }
   }
 
+  if (message.content.toLowerCase().startsWith(`${config.prefix}view`)){
+    if (!args[1]){
+      return message.channel.send(`Sorry ${message.author}, but you're missing the first argument--the username!\n**\`${config.prefix}view username1\`**`).then(message => message.delete(5000));
+    }
+
+    var { body } = await snekfetch.get(`http://api.roblox.com/users/get-by-username?username=${args[1]}`)
+    if (body.errorMessage === "User not found"){
+      return message.channel.send(`Sorry ${message.author}, but you gave me an invalid username!\n**\`${config.prefix}view username1\`**`).then(message => message.delete(5000));
+    }
+    var userID = body.Id
+
+
+    var { body } = await snekfetch.get(`https://www.roblox.com/headshot-thumbnail/json?userId=${userID}&width=180&height=180`);
+    var mugShot = `${body.Url}`
+
+
+    var {body} = await snekfetch.get(`${config.fireBaseURL}/xpData/users/${userID}.json`)
+    var currentXP;
+
+    if (!body){
+      return message.channel.send(`Sorry ${message.author}, but the username that you provided me isn't registered in my database yet.`).then(message => message.delete(5000))
+    }else{
+
+      currentXP = body.xpValue
+      var currentRankID = await rbx.getRankInGroup(config.groupID, userID)
+      var requiredXP;
+      var usernameHeader = `[${args[1].toLowerCase()}](https://www.roblox.com/users/${userID}/profile)`
+      var currentRankAndPoints;
+      var currentRankName;
+      var nextRankName;
+
+      var {body} = await snekfetch.get(`https://groups.roblox.com/v1/groups/${config.groupID}/roles`)
+      console.log(`errors here1`)
+      if ((0 < currentRankID) && (currentRankID < 255)){
+        for (i = 1; i < body.roles.length; i++){
+          if (body.roles[i].rank === currentRankID){
+            currentRankName = body.roles[i].name
+            nextRankNumber = body.roles[i+1].rank
+            nextRankName = body.roles[i+1].name
+            var {body} = await snekfetch.get(`${config.fireBaseURL}/xpData/users/${userID}.json`)
+            currentRankAndPoints = `**${currentRankName} - Currently has ${body.xpValue} ${config.xpName.toUpperCase()}**`
+            var {body} = await snekfetch.get(`${config.fireBaseURL}/roles/${nextRankNumber}.json`)
+            requiredXP = body.requiredXP
+            break
+          }
+        }
+      }else if (currentRankID === 255){
+        currentRankName = await rbx.getRankNameInGroup(config.groupID, userID)
+        var {body} = await snekfetch.get(`${config.fireBaseURL}/xpData/users/${userID}.json`)
+        currentRankAndPoints = `**${currentRankName} - Currently has ${body.xpValue} ${config.xpName}**`
+        requiredXP = 0
+        nextRankName = "??"
+      }else{
+        currentRankName = "Guest"
+        currentRankAndPoints = `**${currentRankName} - Currently has 0 ${config.xpName.toUpperCase()}**`
+        requiredXP = 0
+        nextRankName = `[Join Group](https://www.roblox.com/groups/${config.groupID})`
+      }
+
+
+
+      var percentAge = Math.round(((Number(currentXP))/Number(requiredXP)) * 100)
+      if (Number.isNaN(percentAge)){
+        percentAge = 0
+      }
+      if (percentAge > 100){
+        percentAge = 100
+      }
+
+      var percentBar;
+      if (percentAge === 0){
+        percentBar = ":white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (0 <= percentAge && percentAge <= 10){
+        percentBar = ":white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (10 <= percentAge && percentAge <= 20){
+        percentBar = ":white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (20 <= percentAge && percentAge <= 30){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (30 <= percentAge && percentAge <= 40){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (40 <= percentAge && percentAge <= 50){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (50 <= percentAge && percentAge <= 60){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (60 <= percentAge && percentAge <= 70){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button:"
+      }else if (70 <= percentAge && percentAge <= 80){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button:"
+      }else if (80 <= percentAge && percentAge <= 90){
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button:"
+      }else{
+        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square:"
+      }
+      var remainingErrorNumber = Number(requiredXP-Number(currentXP))
+      if ((remainingErrorNumber < 0) || (remainingErrorNumber === 0)){
+        remainingErrorNumber = "Due 4 Promotion";
+      }
+
+      var remainingError = `**${remainingErrorNumber}** ${config.xpName.toUpperCase()} remaining for **${nextRankName} (${requiredXP} ${config.xpName.toUpperCase()})**`
+
+
+      var response = new Discord.RichEmbed()
+        .setColor(0x45ff9f)
+        .setThumbnail(`${mugShot}`)
+        .setDescription(`${usernameHeader}\n${currentRankAndPoints}\n${percentBar} ${percentAge}%\n${remainingError}`)
+      return message.reply(response).then(message => message.delete(30000))
+    }
+  }
+
   if (message.content.toLowerCase().startsWith(`${config.prefix}github`)){
     var embed = new Discord.RichEmbed()
       .setColor(0xff3636)
@@ -528,115 +637,7 @@ bot.on('message', async message => {
     return message.reply(finallyDone);
   }
 
-  if (message.content.toLowerCase().startsWith(`${config.prefix}view`)){
-    if (!args[1]){
-      return message.channel.send(`Sorry ${message.author}, but you're missing the first argument--the username!\n**\`${config.prefix}view username1\`**`).then(message => message.delete(5000));
-    }
-
-    var { body } = await snekfetch.get(`http://api.roblox.com/users/get-by-username?username=${args[1]}`)
-    if (body.errorMessage === "User not found"){
-      return message.channel.send(`Sorry ${message.author}, but you gave me an invalid username!\n**\`${config.prefix}view username1\`**`).then(message => message.delete(5000));
-    }
-    var userID = body.Id
-
-
-    var { body } = await snekfetch.get(`https://www.roblox.com/headshot-thumbnail/json?userId=${userID}&width=180&height=180`);
-    var mugShot = `${body.Url}`
-
-
-    var {body} = await snekfetch.get(`${config.fireBaseURL}/xpData/users/${userID}.json`)
-    var currentXP;
-
-    if (!body){
-      return message.channel.send(`Sorry ${message.author}, but the username that you provided me isn't registered in my database yet.`).then(message => message.delete(5000))
-    }else{
-
-      currentXP = body.xpValue
-      var currentRankID = await rbx.getRankInGroup(config.groupID, userID)
-      var requiredXP;
-      var usernameHeader = `[${args[1].toLowerCase()}](https://www.roblox.com/users/${userID}/profile)`
-      var currentRankAndPoints;
-      var currentRankName;
-      var nextRankName;
-
-      var {body} = await snekfetch.get(`https://groups.roblox.com/v1/groups/${config.groupID}/roles`)
-      console.log(`errors here1`)
-      if ((0 < currentRankID) && (currentRankID < 255)){
-        for (i = 1; i < body.roles.length; i++){
-          if (body.roles[i].rank === currentRankID){
-            currentRankName = body.roles[i].name
-            nextRankNumber = body.roles[i+1].rank
-            nextRankName = body.roles[i+1].name
-            var {body} = await snekfetch.get(`${config.fireBaseURL}/xpData/users/${userID}.json`)
-            currentRankAndPoints = `**${currentRankName} - Currently has ${body.xpValue} ${config.xpName.toUpperCase()}**`
-            var {body} = await snekfetch.get(`${config.fireBaseURL}/roles/${nextRankNumber}.json`)
-            requiredXP = body.requiredXP
-            break
-          }
-        }
-      }else if (currentRankID === 255){
-        currentRankName = await rbx.getRankNameInGroup(config.groupID, userID)
-        var {body} = await snekfetch.get(`${config.fireBaseURL}/xpData/users/${userID}.json`)
-        currentRankAndPoints = `**${currentRankName} - Currently has ${body.xpValue} ${config.xpName}**`
-        requiredXP = 0
-        nextRankName = "??"
-      }else{
-        currentRankName = "Guest"
-        currentRankAndPoints = `**${currentRankName} - Currently has 0 ${config.xpName.toUpperCase()}**`
-        requiredXP = 0
-        nextRankName = `[Join Group](https://www.roblox.com/groups/${config.groupID})`
-      }
-
-
-
-      var percentAge = Math.round(((Number(currentXP))/Number(requiredXP)) * 100)
-      if (Number.isNaN(percentAge)){
-        percentAge = 0
-      }
-      if (percentAge > 100){
-        percentAge = 100
-      }
-
-      var percentBar;
-      if (percentAge === 0){
-        percentBar = ":white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (0 <= percentAge && percentAge <= 10){
-        percentBar = ":white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (10 <= percentAge && percentAge <= 20){
-        percentBar = ":white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (20 <= percentAge && percentAge <= 30){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (30 <= percentAge && percentAge <= 40){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (40 <= percentAge && percentAge <= 50){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (50 <= percentAge && percentAge <= 60){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (60 <= percentAge && percentAge <= 70){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button: :white_square_button:"
-      }else if (70 <= percentAge && percentAge <= 80){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button: :white_square_button:"
-      }else if (80 <= percentAge && percentAge <= 90){
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_square_button:"
-      }else{
-        percentBar = ":white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square: :white_large_square:"
-      }
-      var remainingErrorNumber = Number(requiredXP-Number(currentXP))
-      if ((remainingErrorNumber < 0) || (remainingErrorNumber === 0)){
-        remainingErrorNumber = "Due 4 Promotion";
-      }
-
-      var remainingError = `**${remainingErrorNumber}** ${config.xpName.toUpperCase()} remaining for **${nextRankName} (${requiredXP} ${config.xpName.toUpperCase()})**`
-
-
-      var response = new Discord.RichEmbed()
-        .setColor(0x45ff9f)
-        .setThumbnail(`${mugShot}`)
-        .setDescription(`${usernameHeader}\n${currentRankAndPoints}\n${percentBar} ${percentAge}%\n${remainingError}`)
-      return message.reply(response).then(message => message.delete(30000))
-    }
-
-  }
+  
 
 });
 
