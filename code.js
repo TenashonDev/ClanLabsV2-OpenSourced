@@ -92,60 +92,84 @@ bot.on('message', async message => {
       return message.channel.send(`Sorry ${message.author}, but you need to provide me 
         with a ROBLOX username.`).then(message => message.delete(5000));
     }else{
-      var { body } = await snekfetch.get(`http://api.roblox.com/users/get-by-username?username=${args[1]}`)
-      
-      if (body.errorMessage === "User not found"){
-        return message.channel.send(`Sorry ${message.author}, but could you please provide 
-          me with a real ROBLOX username?`).then(message => message.delete(5000));
-      }
-
-      var verifyCode = `${verificationCode[Math.floor(Math.random() * verificationCode.length)]} 
-      ${verificationCode[Math.floor(Math.random() * verificationCode.length)]} ${verificationCode[Math.floor(Math.random() * 
-        verificationCode.length)]} ${verificationCode[Math.floor(Math.random() * verificationCode.length)]}`;
 
 
-      const statusCode = [`RBLX-${verifyCode}`];
-      const token = statusCode[Math.floor(Math.random() * statusCode.length)];
+      var { body } = await snekfetch.get(`https://verify.eryn.io/api/user/${message.author.id}`);
 
-      const goodMessage = new Discord.RichEmbed()
-        .setColor(0x3eff97)
-        .setTitle(`Verification`)
-        .setDescription(`Profile: https://web.roblox.com/users/${body.Id}/profile\n\nReplace your current status with: 
-          **${token}**\n\n\n` + "**Chat `done` in __here__ to me when you've changed your status successfully!**")
+      if (body.status == "ok"){
+        var statusOK = new Discord.RichEmbed()
+          .setColor(0x3eff97)
+          .setTitle(`Verification`)
+          .setDescription(`Fetched data from RoVer, nice to meet you **${body.robloxUsername}**! :smiley:`)
 
-      const location = await message.author.send(goodMessage).then(msg => msg.channel).catch(() => {
-        return message.channel.send(`Sorry ${message.author}, but I couldn't direct message you!`)
-        .then(message => message.delete(5000));
-      })
 
-      const timeCollectionThing = { max: 1, time: 300000, errors: ['time'] };
-      const collected = await location.awaitMessages(response => message.author === response.author && 
-        response.content === 'done', timeCollectionThing).catch(() => null);
-      if (!collected) {
-        return message.channel.send(`Sorry ${message.author}, but I've waited patiently for five minutes and you haven't chatted 
-          **\`done\`**--I've cancelled the verification process.`).then(message => message.delete(5000));
-      }
+        var rblx_user_ID = body.robloxId;
+        var rblx_username = body.robloxUsername;
+        var rank_number = await rbx.getRankInGroup(config.groupID, rblx_user_ID);
 
-      const statusChange = await rbx.getStatus(await rbx.getIdFromUsername(args[1]));
-      const blurbChange = await rbx.getBlurb(await rbx.getIdFromUsername(args[1]));
-      var rblx_user_ID = await rbx.getIdFromUsername(args[1]);
-      var rblx_username = await rbx.getUsernameFromId(rblx_user_ID);
-      var rank_number = await rbx.getRankInGroup(config.groupID, rblx_user_ID)
+        /*
+          FEATURE:
+          Delete the commented portion of the code if you want roles and nicknames to change IF
+          the user is in the group
+        */
 
-      /*
-        **FEATURE**
-        If you want users to be verified ONLY if they're in the group, then uncomment where commented
-      */
-      if ((statusChange === token || blurbChange === token) /*&& (rank_number > 0)*/){
-        await message.member.addRole(verifiedRole);
-        await message.member.setNickname(`${rblx_username}`);
-        return message.author.send(`${config.welcomeMessage}`);
-      }/*else if (rank_number == 0){
-        return message.author.send(`Sorry, but I can't verify you because you're **not** in the group!\n
-          Please join the group and rerun the verification command!`);
-      }*/else{
-        return message.channel.send(`Sorry ${message.author}, but I couldn't find the code on your blurb 
-          or status.`).then(message => message.delete(5000));
+        /* if (rank_number > 0){ */
+          await message.member.addRole(verifiedRole);
+          await message.member.setNickname(`${rblx_username}`);
+          return message.author.send(`${config.welcomeMessage}`);
+        /* } */
+      }else{
+        var { body } = await snekfetch.get(`http://api.roblox.com/users/get-by-username?username=${args[1]}`);
+        
+        if (body.errorMessage === "User not found"){
+          return message.channel.send(`Sorry ${message.author}, but could you please provide 
+            me with a real ROBLOX username?`).then(message => message.delete(5000));
+        }
+
+        var verifyCode = `${verificationCode[Math.floor(Math.random() * verificationCode.length)]} 
+        ${verificationCode[Math.floor(Math.random() * verificationCode.length)]} ${verificationCode[Math.floor(Math.random() * 
+          verificationCode.length)]} ${verificationCode[Math.floor(Math.random() * verificationCode.length)]}`;
+
+
+        const statusCode = [`RBLX-${verifyCode}`];
+        const token = statusCode[Math.floor(Math.random() * statusCode.length)];
+
+       
+
+        const location = await message.author.send(goodMessage).then(msg => msg.channel).catch(() => {
+          return message.channel.send(`Sorry ${message.author}, but I couldn't direct message you!`)
+          .then(message => message.delete(5000));
+        })
+
+        const timeCollectionThing = { max: 1, time: 300000, errors: ['time'] };
+        const collected = await location.awaitMessages(response => message.author === response.author && 
+          response.content === 'done', timeCollectionThing).catch(() => null);
+        if (!collected) {
+          return message.channel.send(`Sorry ${message.author}, but I've waited patiently for five minutes and you haven't chatted 
+            **\`done\`**--I've cancelled the verification process.`).then(message => message.delete(5000));
+        }
+
+        const statusChange = await rbx.getStatus(await rbx.getIdFromUsername(args[1]));
+        const blurbChange = await rbx.getBlurb(await rbx.getIdFromUsername(args[1]));
+        var rblx_user_ID = await rbx.getIdFromUsername(args[1]);
+        var rblx_username = await rbx.getUsernameFromId(rblx_user_ID);
+        var rank_number = await rbx.getRankInGroup(config.groupID, rblx_user_ID)
+
+        /*
+          **FEATURE**
+          If you want users to be verified ONLY if they're in the group, then uncomment where commented
+        */
+        if ((statusChange === token || blurbChange === token) /*&& (rank_number > 0)*/){
+          await message.member.addRole(verifiedRole);
+          await message.member.setNickname(`${rblx_username}`);
+          return message.author.send(`${config.welcomeMessage}`);
+        }/*else if (rank_number == 0){
+          return message.author.send(`Sorry, but I can't verify you because you're **not** in the group!\n
+            Please join the group and rerun the verification command!`);
+        }*/else{
+          return message.channel.send(`Sorry ${message.author}, but I couldn't find the code on your blurb 
+            or status.`).then(message => message.delete(5000));
+        }
       }
     }
   }
