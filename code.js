@@ -7,13 +7,7 @@ const Discord = require('discord.js');
 const bot = new Discord.Client();
 const snekfetch = require('snekfetch');
 const rbx = require('noblox.js');
-const bloxy = require('bloxy');
-const bloxyClient = new bloxy({
-  cookie: `${config.rblxCookie}`
-})
-bloxyClient.login().then(function() {
-  console.log("Logged in on ROBLOX")
-});
+await rbx.cookieLogin(`${config.rblxCookie}`)
 const firebase = require("firebase");
 const firebaseConfig = {
     databaseURL: `${config.fireBaseURL}`,
@@ -295,33 +289,49 @@ bot.on('message', async message => {
       .setDescription(`This project was developed by [Nishant Srivastava](https://www.github.com/nishi7409).`)
     return await message.channel.send(embed)
   }
-  // work on code below
-
-
-
-
-
 
   if (message.content.toLowerCase().startsWith(`${config.prefix}${config.xpName}`)){
-    if (!message.member.roles.exists("name", `${config.officerRoleE}`)){
-      return message.channel.send(`Sorry ${message.author}, but only users with the **\`${config.officerRoleE}\`** can run that command!`).then(message => message.delete(5000));
-    }
-    if (!args[1]){
-      return message.channel.send(`Sorry ${message.author}, but you're missing the first argument--add or remove?\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+    if (!message.member.roles.exists("name", `${config.officer_role_name}`)){
+      return message.channel.send(`Sorry ${message.author}, but only users with the 
+        **\`${config.officer_role_name}\`** can run that command!`).then(message => message.delete(5000));
+    }else if (!args[1]){
+      return message.channel.send(`Sorry ${message.author}, but you're missing the first 
+        argument--add or remove?\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, 
+        username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, 
+        username2, username3...\`**`).then(message => message.delete(5000));
     }else if (args[1].toLowerCase() !== "add" && args[1].toLowerCase() !== "remove"){
-      return message.channel.send(`Sorry ${message.author}, but you didn't provide me with a correct first argument--add or remove?\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+      return message.channel.send(`Sorry ${message.author}, but you didn't provide me with a correct first argument--
+        add or remove?\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...
+        \`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, 
+        username3...\`**`).then(message => message.delete(5000));
     }else{
       if (!args[2]){
-        return message.channel.send(`Sorry ${message.author}, but you're missing the second argument--number of ${config.xpName}?\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+        return message.channel.send(`Sorry ${message.author}, but you're missing the second argument--
+          number of ${config.xpName}?\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, 
+          username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, 
+          username3...\`**`).then(message => message.delete(5000));
       }else if (isNaN(Number(args[2]))){
-        return message.channel.send(`Sorry ${message.author}, but you didn't provide me with a real number.\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+        return message.channel.send(`Sorry ${message.author}, but you didn't provide me with a real number.
+          \n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\n
+          Removing ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, 
+          username3...\`**`).then(message => message.delete(5000));
       }else if (args[2] < 0){
-        return message.channel.send(`Sorry ${message.author}, but you need to provide me with a positive number.\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+        return message.channel.send(`Sorry ${message.author}, but you need to provide me with a positive 
+          number.\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, 
+          username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, 
+          username3...\`**`).then(message => message.delete(5000));
       }else if (args[2] > config.maxXP){
-        return message.channel.send(`Sorry ${message.author}, but you need to provide mw with a number that's less than the max ${config.xpName}--currently set at ${config.maxXP} ${config.xpName}.\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+        return message.channel.send(`Sorry ${message.author}, but you need to provide mw with a number that's less than 
+          the max ${config.xpName}--currently set at ${config.maxXP} ${config.xpName}.\n**Adding ${config.xpName}: 
+          \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: 
+          \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
       }else if (!args[3]){
-        return message.channel.send(`Sorry ${message.author}, but you're missing the third argument--the usernames!\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, username3...\`**`).then(message => message.delete(5000));
+        return message.channel.send(`Sorry ${message.author}, but you're missing the third argument--the 
+          usernames!\n**Adding ${config.xpName}: \`${config.prefix}${config.xpName} add 1 username1, username2, 
+          username3...\`\nRemoving ${config.xpName}: \`${config.prefix}${config.xpName} remove 1 username1, username2, 
+          username3...\`**`).then(message => message.delete(5000));
       }else{
+
         if (args[1].toLowerCase() === "add"){
           var userArray = message.content.slice(message.content.indexOf(message.content.split(" ")[3])).split(', ');
           for (i = 0; i < userArray.length; i++){
@@ -356,7 +366,8 @@ bot.on('message', async message => {
                 var auditLogEmbed = new Discord.RichEmbed()
                   .setColor(0xff793b)
                   .setTitle(`**Add**`)
-                  .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** ${config.xpName} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
+                  .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** 
+                    ${config.xpName} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
                   bot.channels.get(promoLogs.id).send(auditLogEmbed);
               }else{
                 var currentRankID = await rbx.getRankInGroup(config.groupID, userID)
@@ -377,7 +388,8 @@ bot.on('message', async message => {
                   var auditLogEmbed = new Discord.RichEmbed()
                     .setColor(0xff793b)
                     .setTitle(`**Add**`)
-                    .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** ${config.xpName.toUpperCase()} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
+                    .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** 
+                      ${config.xpName.toUpperCase()} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
                     bot.channels.get(promoLogs.id).send(auditLogEmbed);
 
                   var { body } = await snekfetch.get(`${config.fireBaseURL}/roles/${currentRankID}.json`);
@@ -401,12 +413,14 @@ bot.on('message', async message => {
 
                     if (Number(currentRankID) === Number(bodyRolesRankNum)){
                       if (currentXP < requiredXPAtCurrentRankID){
-                        await groupFunction.demote(Number(userID))
+                        await rbx.demote(Number(userID))
                         console.log('demoted')
                         var rblxUsername = await rbx.getUsernameFromId(userID)
                         var embed = new Discord.RichEmbed()
                         .setColor(0xeb4034)
-                        .setDescription(`Unfortunately, [${rblxUsername}](https://www.roblox.com/users/${userID}/profile) has been demoted because [${rblxUsername}](https://www.roblox.com/users/${userID}/profile)'s ${config.xpName} was less than the required amount of ${config.xpName} for the rank of **\`${bodyRoleRankName}\` (${requiredXPAtCurrentRankID})** `)
+                        .setDescription(`Unfortunately, [${rblxUsername}](https://www.roblox.com/users/${userID}/profile) 
+                          has been demoted because [${rblxUsername}](https://www.roblox.com/users/${userID}/profile)'s ${config.xpName} 
+                          was less than the required amount of ${config.xpName} for the rank of **\`${bodyRoleRankName}\` (${requiredXPAtCurrentRankID})** `)
                         await message.channel.send(embed)
                       }
                     }
@@ -433,7 +447,7 @@ bot.on('message', async message => {
                         .setColor(0x26ff93)
                         .setDescription(`[${rblxUsername}](https://www.roblox.com/users/${userID}/profile) has been promoted!`)
                         await message.channel.send(embed)
-                        await groupFunction.promote(Number(userID));
+                        await rbx.promote(Number(userID));
                       }
                     }
                   }
@@ -475,7 +489,8 @@ bot.on('message', async message => {
                 var auditLogEmbed = new Discord.RichEmbed()
                   .setColor(0xff793b)
                   .setTitle(`**Remove**`)
-                  .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** ${config.xpName} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
+                  .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** 
+                    ${config.xpName} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
                   bot.channels.get(promoLogs.id).send(auditLogEmbed);
               }else{
                 firebase.database().ref(`xpData/users/${userID}`).set({
@@ -505,7 +520,8 @@ bot.on('message', async message => {
                   var auditLogEmbed = new Discord.RichEmbed()
                     .setColor(0xff793b)
                     .setTitle(`**Remove**`)
-                    .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}** ${config.xpName} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
+                    .setDescription(`**${message.author}** (${message.author.id})\nModified **${newNumber}**
+                     ${config.xpName} for ${userArray[i].toLowerCase()} (${userID})\n\n**Channel:**\n<#${message.channel.id}>`);
                     bot.channels.get(promoLogs.id).send(auditLogEmbed);
 
 
@@ -530,12 +546,14 @@ bot.on('message', async message => {
 
                     if (Number(currentRankID) === Number(bodyRolesRankNum)){
                       if (currentXP < requiredXPAtCurrentRankID){
-                        await groupFunction.demote(Number(userID))
+                        await rbx.demote(Number(userID))
                         console.log('demoted')
                         var rblxUsername = await rbx.getUsernameFromId(userID)
                         var embed = new Discord.RichEmbed()
                         .setColor(0xeb4034)
-                        .setDescription(`Unfortunately, [${rblxUsername}](https://www.roblox.com/users/${userID}/profile) has been demoted because [${rblxUsername}](https://www.roblox.com/users/${userID}/profile)'s ${config.xpName} was less than the required amount of ${config.xpName} for the rank of **\`${bodyRoleRankName}\` (${requiredXPAtCurrentRankID})** `)
+                        .setDescription(`Unfortunately, [${rblxUsername}](https://www.roblox.com/users/${userID}/profile) 
+                          has been demoted because [${rblxUsername}](https://www.roblox.com/users/${userID}/profile)'s ${config.xpName} 
+                          was less than the required amount of ${config.xpName} for the rank of **\`${bodyRoleRankName}\` (${requiredXPAtCurrentRankID})** `)
                         await message.channel.send(embed)
                       }
                     }
@@ -561,7 +579,7 @@ bot.on('message', async message => {
                         .setColor(0x26ff93)
                         .setDescription(`[${rblxUsername}](https://www.roblox.com/users/${userID}/profile) has been promoted!`)
                         await message.channel.send(embed)
-                        await groupFunction.promote(Number(userID));
+                        await rbx.promote(Number(userID));
                       }
                     }
                   }
@@ -573,6 +591,12 @@ bot.on('message', async message => {
       }
     }
   }
+  // work on code below
+
+
+
+
+
 
   if (message.content.toLowerCase().startsWith(`${config.prefix}setup`)){
     if (message.author.id !== message.guild.owner.id){
