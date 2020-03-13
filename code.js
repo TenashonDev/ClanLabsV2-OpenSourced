@@ -591,23 +591,19 @@ bot.on('message', async message => {
       }
     }
   }
-  // work on code below
-
-
-
-
-
-
+  
   if (message.content.toLowerCase().startsWith(`${config.prefix}setup`)){
     if (message.author.id !== message.guild.owner.id){
-      return message.channel.send(`Sorry ${message.author}, but only the guild owner (${message.guild.owner}) can run that command!`).then(message => message.delete(5000));
-    }
-    if (config.groupID === 0){
-      return message.channel.send(`Sorry ${message.author}, but I'm missing the group's ID--which can be entered in the config.json file.`).then(message => message.delete(5000));
+      return message.channel.send(`Sorry ${message.author}, but only the guild owner (${message.guild.owner}) can 
+        run that command!`).then(message => message.delete(5000));
+    }else if (config.groupID === 0){
+      return message.channel.send(`Sorry ${message.author}, but I'm missing the group's ID--which can be entered in the
+       config.json file.`).then(message => message.delete(5000));
     }
     var {body} = await snekfetch.get(`https://groups.roblox.com/v1/groups/${config.groupID}`)
     if (body.errors){
-      return message.channel.send(`Sorry ${message.author}, but you provided me with an invalid group ID in the config.json file.`).then(message => message.delete(5000));
+      return message.channel.send(`Sorry ${message.author}, but you provided me with an invalid group ID in 
+        the config.json file.`).then(message => message.delete(5000));
     }
     await message.channel.send(`Pulling information from **${body.name}** (\`${body.id}\`)`).then(message => message.delete(2000));
     var {body} = await snekfetch.get(`https://groups.roblox.com/v1/groups/${config.groupID}/roles`)
@@ -623,7 +619,8 @@ bot.on('message', async message => {
           requiredXP: 0 // has to be zero to make sense
         })
       }else{
-        const location = await message.channel.send(`How many ${config.xpName} should be required to achieve the rank of **\`${body.roles[i].name}\`**?`).then(msg => msg.channel).catch(() => {
+        const location = await message.channel.send(`How many ${config.xpName} should be required to achieve the rank of **
+          \`${body.roles[i].name}\`**?`).then(msg => msg.channel).catch(() => {
           return message.channel.send(`Sorry ${message.author}, but I couldn't direct message you.`).then(message => message.delete(6000));
         })
         const timeCollectionThing = { max: 1, time: 30000, errors: ['time'] };
@@ -634,13 +631,15 @@ bot.on('message', async message => {
         }else if (Number(responseArray1[0]) < 0){
           return message.channel.send(`Sorry ${message.author}, but you provided me with a negative number.  I've cancelled the setup process.`)
         }else if (Number(responseArray1[0]) <= Number(xpData[i]) && Number(responseArray1[0]) !== Number(0)){
-          return message.channel.send(`Sorry ${message.author}, but you provided me with a number that was either less than or equal to the required ${config.xpName} for the previous rank--the logic **will not** work if continued.  I've cancelled the setup process.`)
+          return message.channel.send(`Sorry ${message.author}, but you provided me with a number that was either less than or equal
+           to the required ${config.xpName} for the previous rank--the logic **will not** work if continued.  I've cancelled the setup process.`)
         }else{
           firebase.database().ref(`roles/${body.roles[i].rank}`).set({
             requiredXP: Number(responseArray1[0])
           })
           xpData.push(Number(responseArray1[0]));
-          await message.channel.send(`Awesome, I've set the required ${config.xpName} to achieve the rank of **\`${body.roles[i].name}\`** @ **${responseArray1[0]}**!`)
+          await message.channel.send(`Awesome, I've set the required ${config.xpName} to achieve the rank of **\`${body.roles[i].name}\`** @ 
+            **${responseArray1[0]}**!`)
         }
       }
     }
@@ -660,8 +659,6 @@ bot.on('message', async message => {
     }
     return message.reply(finallyDone);
   }
-
-  
 
 });
 
